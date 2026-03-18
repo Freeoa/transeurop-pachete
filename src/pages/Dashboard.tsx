@@ -5,7 +5,7 @@ import { ro } from 'date-fns/locale';
 import { createColumnHelper } from '@tanstack/react-table';
 import {
   Plus, Package, User, Car, MoreHorizontal, AlertTriangle,
-  AlertCircle, Info, Truck, MapPin,
+  AlertCircle, Info, Truck, MapPin, ChevronDown,
 } from 'lucide-react';
 import { Button, Badge, KPICard, DataTable, StatusTimeline } from '../components/ui';
 import { usePullToRefresh } from '../hooks/usePullToRefresh';
@@ -86,6 +86,7 @@ export default function Dashboard() {
     onRefresh: () => toast('Date actualizate', 'success'),
   });
   const [activeFilter, setActiveFilter] = useState<FilterChip>('toate');
+  const [alertsOpen, setAlertsOpen] = useState(true);
 
   // ── Route lookup ──
   const routeMap = useMemo(
@@ -384,48 +385,76 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Alerts bar (full width, horizontal scroll on mobile) */}
+      {/* Alerts — collapsible */}
       {activeAlerts.length > 0 && (
-        <div className="rounded-[6px] border border-border bg-bg-primary mb-6">
-          <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
-            <h2 className="text-[13px] font-semibold text-text-primary">Alerte</h2>
-            <Badge variant="danger">{activeAlerts.length}</Badge>
-          </div>
-          <div className="flex gap-3 p-3 overflow-x-auto">
-            {activeAlerts.map((alert) => {
-              const Icon = severityIcon[alert.severitate] || Info;
-              return (
-                <div
-                  key={alert.id}
-                  className={[
-                    'flex items-start gap-2.5 px-3 py-2.5 rounded-[6px] border-l-[3px] bg-bg-secondary min-w-[260px] shrink-0',
-                    severityBorder[alert.severitate] || 'border-l-border',
-                  ].join(' ')}
-                >
-                  <Icon
-                    className={[
-                      'size-4 mt-0.5 shrink-0',
-                      alert.severitate === 'critic'
-                        ? 'text-danger'
-                        : alert.severitate === 'atentie'
-                          ? 'text-warning'
-                          : 'text-info',
-                    ].join(' ')}
-                  />
-                  <div className="min-w-0">
-                    <p className="text-[13px] text-text-primary leading-snug">
-                      {alert.mesaj}
-                    </p>
-                    <p className="text-xs text-text-tertiary mt-1">
-                      {formatDistanceToNow(parseISO(alert.timestamp), {
-                        addSuffix: true,
-                        locale: ro,
-                      })}
-                    </p>
+        <div className="rounded-[6px] border border-border bg-bg-primary mb-6 overflow-hidden">
+          <button
+            onClick={() => setAlertsOpen((v) => !v)}
+            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-bg-secondary transition-colors"
+          >
+            <div className="flex items-center justify-center size-7 rounded-full bg-danger-bg shrink-0">
+              <AlertTriangle className="size-3.5 text-danger" />
+            </div>
+            <span className="text-[13px] font-semibold text-text-primary">Alerte</span>
+            <Badge variant="danger" className="ml-1">{activeAlerts.length}</Badge>
+            <ChevronDown
+              className={[
+                'size-4 text-text-tertiary ml-auto transition-transform duration-200',
+                alertsOpen ? 'rotate-180' : '',
+              ].join(' ')}
+            />
+          </button>
+
+          <div
+            className="transition-[max-height,opacity] duration-300 ease-in-out overflow-hidden"
+            style={{
+              maxHeight: alertsOpen ? `${activeAlerts.length * 80 + 16}px` : '0px',
+              opacity: alertsOpen ? 1 : 0,
+            }}
+          >
+            <div className="px-3 pb-3 space-y-2">
+              {activeAlerts.map((alert) => {
+                const Icon = severityIcon[alert.severitate] || Info;
+                const severityBg: Record<string, string> = {
+                  critic: 'bg-danger-bg',
+                  atentie: 'bg-warning-bg',
+                  info: 'bg-info-bg',
+                };
+                return (
+                  <div
+                    key={alert.id}
+                    className="flex items-start gap-3 px-3 py-2.5 rounded-[6px] bg-bg-secondary border border-border"
+                  >
+                    <div className={[
+                      'flex items-center justify-center size-6 rounded-full shrink-0 mt-0.5',
+                      severityBg[alert.severitate] || 'bg-bg-tertiary',
+                    ].join(' ')}>
+                      <Icon
+                        className={[
+                          'size-3.5',
+                          alert.severitate === 'critic'
+                            ? 'text-danger'
+                            : alert.severitate === 'atentie'
+                              ? 'text-warning'
+                              : 'text-info',
+                        ].join(' ')}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] text-text-primary leading-snug">
+                        {alert.mesaj}
+                      </p>
+                      <p className="text-[11px] text-text-tertiary mt-1">
+                        {formatDistanceToNow(parseISO(alert.timestamp), {
+                          addSuffix: true,
+                          locale: ro,
+                        })}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
