@@ -1486,8 +1486,8 @@ export default function SimuladorPage() {
           <div className="tacho-keys" style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             {[['↑↓','navigare'],['Enter','confirmare'],['Esc','anulare'],['I','inserare'],['E','extragere']].map(([k, v]) => (
               <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <kbd style={{ fontSize: 9, padding: '2px 5px', background: T.bgElev, border: `1px solid ${T.borderMed}`, borderRadius: 4, color: T.textSecondary, fontFamily: 'monospace' }}>{k}</kbd>
-                <span style={{ fontSize: 9, color: T.textMuted }}>{v}</span>
+                <kbd style={{ fontSize: 10, padding: '2px 6px', background: T.bgRaised, border: `1px solid ${T.borderMed}`, borderRadius: 4, color: T.textPrimary, fontFamily: 'monospace', fontWeight: 600 }}>{k}</kbd>
+                <span style={{ fontSize: 10, color: T.textSecondary, fontWeight: 500 }}>{v}</span>
               </div>
             ))}
           </div>
@@ -1521,9 +1521,9 @@ export default function SimuladorPage() {
             {/* Atajos visibles bajo el dispositivo */}
             <div style={{ marginTop: 14, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {[['↑↓','navigare'],['Enter','confirmare'],['Esc','anulare'],['I','inserare card'],['E','extragere card']].map(([k,v]) => (
-                <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', background: T.bgSurface, borderRadius: T.rSm, border: `1px solid ${T.borderSubtle}` }}>
-                  <kbd style={{ fontSize: 9, color: T.textSecondary, fontFamily: 'monospace', fontWeight: 700 }}>{k}</kbd>
-                  <span style={{ fontSize: 9, color: T.textMuted }}>{v}</span>
+                <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', background: T.bgElev, borderRadius: T.rSm, border: `1px solid ${T.borderMed}` }}>
+                  <kbd style={{ fontSize: 10, color: T.textPrimary, fontFamily: 'monospace', fontWeight: 700 }}>{k}</kbd>
+                  <span style={{ fontSize: 10, color: T.textSecondary, fontWeight: 500 }}>{v}</span>
                 </div>
               ))}
             </div>
