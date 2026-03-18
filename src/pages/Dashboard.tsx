@@ -1,11 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isToday, isThisWeek, parseISO, formatDistanceToNow } from 'date-fns';
 import { ro } from 'date-fns/locale';
 import { createColumnHelper } from '@tanstack/react-table';
 import {
   Plus, Package, User, Car, MoreHorizontal, AlertTriangle,
-  AlertCircle, Info, Truck, MapPin, ChevronDown,
+  AlertCircle, Info, Truck, MapPin, ChevronDown, Maximize2,
 } from 'lucide-react';
 import { Button, Badge, KPICard, DataTable, StatusTimeline } from '../components/ui';
 import { usePullToRefresh } from '../hooks/usePullToRefresh';
@@ -23,6 +23,10 @@ import {
   getPaymentStatusColor,
 } from '../utils';
 import type { Order, OrderType, OrderStatus, Currency } from '../types';
+import { ROUTE_PATHS, ROUTE_COLORS, CITY_COORDS } from '../components/shared/RouteMap';
+import type { MapMarker, MapRoute } from '../components/shared/RouteMap';
+
+const RouteMap = lazy(() => import('../components/shared/RouteMap'));
 
 // ── Filter types ────────────────────────────────────────────
 type FilterChip = 'toate' | 'colet' | 'pasager' | 'masina' | 'neplatite';
@@ -207,6 +211,72 @@ export default function Dashboard() {
     [],
   );
 
+  // ── Map data: active routes + simulated vehicle positions ──
+  const { mapRoutes, mapMarkers } = useMemo(() => {
+    const activeRoutes = store.state.routes.filter((r) => r.activa);
+    const liveStatuses = new Set<OrderStatus>(['nou', 'confirmat', 'ridicat', 'in_tranzit']);
+
+    const routes: MapRoute[] = [];
+    const markers: MapMarker[] = [];
+
+    activeRoutes.forEach((route) => {
+      const path = ROUTE_PATHS[route.id];
+      if (!path) return;
+      const color = ROUTE_COLORS[route.id] || '#6366F1';
+      routes.push({ id: route.id, name: route.name, path, color });
+
+      // Find in-transit orders on this route to simulate vehicle position
+      const inTransitOrders = store.state.orders.filter(
+        (o) => o.routeId === route.id && liveStatuses.has(o.status),
+      );
+      if (inTransitOrders.length > 0) {
+        // Simulate vehicle somewhere along the route (30-70% progress)
+        const progress = 0.3 + (route.id.charCodeAt(route.id.length - 1) % 5) * 0.1;
+        const segIndex = Math.floor(progress * (path.length - 1));
+        const segFrac = (progress * (path.length - 1)) - segIndex;
+        const p1 = path[Math.min(segIndex, path.length - 1)];
+        const p2 = path[Math.min(segIndex + 1, path.length - 1)];
+        const lat = p1[0] + (p2[0] - p1[0]) * segFrac;
+        const lng = p1[1] + (p2[1] - p1[1]) * segFrac;
+
+        const driver = inTransitOrders[0].soferId
+          ? mockDrivers.find((d) => d.id === inTransitOrders[0].soferId)?.name
+          : undefined;
+
+        markers.push({
+          id: `vehicle-${route.id}`,
+          position: [lat, lng],
+          label: driver || route.name,
+          sublabel: `${inTransitOrders.length} comenzi active`,
+          type: 'inTransit',
+        });
+      }
+    });
+
+    // Add origin/destination city markers
+    const addedCities = new Set<string>();
+    activeRoutes.forEach((route) => {
+      [route.origin, route.destination].forEach((place) => {
+        if (addedCities.has(place)) return;
+        // Try to find coords for origin/destination
+        const coords = Object.entries(CITY_COORDS).find(([city]) =>
+          place.toLowerCase().includes(city.toLowerCase()) || city.toLowerCase().includes(place.toLowerCase())
+        );
+        if (coords) {
+          addedCities.add(place);
+          markers.push({
+            id: `city-${place}`,
+            position: coords[1],
+            label: place,
+            type: 'city',
+          });
+        }
+      });
+    });
+
+    return { mapRoutes: routes, mapMarkers: markers };
+  }, [store.state.routes, store.state.orders]);
+
   // ── Table columns ──
   const columns = useMemo(
     () => [
@@ -378,6 +448,38 @@ export default function Dashboard() {
             />
           </div>
         ))}
+      </div>
+
+      {/* Live Map — active routes & vehicles */}
+      <div className="rounded-[6px] border border-border bg-bg-primary mb-6 overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+          <div className="flex items-center gap-2">
+            <MapPin className="size-4 text-accent" />
+            <h2 className="text-[13px] font-semibold text-text-primary">Hartă rute active</h2>
+            <Badge variant="accent">{mapRoutes.length}</Badge>
+          </div>
+          <button
+            onClick={() => navigate('/harta')}
+            className="flex items-center gap-1.5 text-[12px] text-text-secondary hover:text-accent transition-colors"
+          >
+            <Maximize2 className="size-3.5" />
+            <span className="hidden sm:inline">Extinde</span>
+          </button>
+        </div>
+        <Suspense fallback={
+          <div className="flex items-center justify-center h-[250px] sm:h-[300px] text-text-tertiary text-[13px]">
+            Se încarcă harta...
+          </div>
+        }>
+          <div className="h-[250px] sm:h-[300px]">
+            <RouteMap
+              routes={mapRoutes}
+              markers={mapMarkers}
+              height="100%"
+              className="rounded-none border-0"
+            />
+          </div>
+        </Suspense>
       </div>
 
       {/* Alerts — collapsible */}
