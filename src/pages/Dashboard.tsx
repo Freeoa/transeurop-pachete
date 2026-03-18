@@ -39,11 +39,6 @@ const filterChips: { key: FilterChip; label: string }[] = [
 const col = createColumnHelper<Order>();
 
 // ── Severity helpers ────────────────────────────────────────
-const severityBorder: Record<string, string> = {
-  critic: 'border-l-danger',
-  atentie: 'border-l-warning',
-  info: 'border-l-info',
-};
 const severityIcon: Record<string, typeof AlertTriangle> = {
   critic: AlertCircle,
   atentie: AlertTriangle,
