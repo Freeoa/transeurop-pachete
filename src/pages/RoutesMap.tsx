@@ -1,32 +1,18 @@
 import { useState, useMemo } from 'react';
-import { Map as MapIcon, Filter, Calendar, Route as RouteIcon, Package, User, Car, Truck } from 'lucide-react';
+import { Map as MapIcon, Filter, Calendar, Package, User, Car, Truck } from 'lucide-react';
 import RouteMap, {
   ROUTE_PATHS, ROUTE_COLORS, geocodeAddress,
   type MapMarker, type MapRoute,
 } from '../components/shared/RouteMap';
 import { useDataStore } from '../contexts/DataStoreContext';
 import { mockDrivers } from '../data';
-import { getStatusLabel, getOrderTypeLabel, formatDate } from '../utils';
+import { getStatusLabel, getOrderTypeLabel } from '../utils';
 import type { OrderStatus } from '../types';
 
 // ── Filter types ─────────────────────────────────────────────
 type ViewMode = 'toate' | 'azi' | 'saptamana';
 
 const LIVE_STATUSES: OrderStatus[] = ['nou', 'confirmat', 'ridicat', 'in_tranzit'];
-
-const statusDot: Record<string, string> = {
-  nou: 'bg-blue-400',
-  confirmat: 'bg-indigo-500',
-  ridicat: 'bg-amber-500',
-  in_tranzit: 'bg-orange-500',
-  livrat: 'bg-emerald-500',
-};
-
-const typeIcons: Record<string, React.ReactNode> = {
-  colet: <Package className="size-3.5" />,
-  pasager: <User className="size-3.5" />,
-  masina: <Car className="size-3.5" />,
-};
 
 export default function RoutesMap() {
   const store = useDataStore();
@@ -84,10 +70,9 @@ export default function RoutesMap() {
     filteredOrders.forEach((order) => {
       const pickupCoords = geocodeAddress(order.adresaRidicare);
       const deliveryCoords = geocodeAddress(order.adresaLivrare);
-      const markerType = order.status === 'in_tranzit' ? 'inTransit'
+      const pickupType: MapMarker['type'] = order.status === 'in_tranzit' ? 'inTransit'
         : order.status === 'problema' ? 'problem'
-        : order.status === 'confirmat' || order.status === 'nou' ? 'pickup'
-        : 'delivery';
+        : 'pickup';
 
       if (pickupCoords) {
         const key = `pickup-${pickupCoords.join(',')}`;
@@ -98,7 +83,7 @@ export default function RoutesMap() {
             position: pickupCoords,
             label: `Ridicare: ${order.awb}`,
             sublabel: `${order.adresaRidicare} · ${getOrderTypeLabel(order.type)} · ${getStatusLabel(order.status)}`,
-            type: 'pickup',
+            type: pickupType,
           });
         }
       }
