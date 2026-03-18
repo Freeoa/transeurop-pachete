@@ -12,7 +12,10 @@ export function usePullToRefresh({ onRefresh, threshold = 80 }: PullToRefreshOpt
   const pulling = useRef(false);
 
   const handleTouchStart = useCallback((e: TouchEvent) => {
-    if (window.scrollY === 0) {
+    // Check the scrollable <main> container, not window.scrollY
+    const main = document.querySelector('main');
+    const atTop = main ? main.scrollTop <= 0 : window.scrollY === 0;
+    if (atTop) {
       startY.current = e.touches[0].clientY;
       pulling.current = true;
     }
@@ -23,6 +26,10 @@ export function usePullToRefresh({ onRefresh, threshold = 80 }: PullToRefreshOpt
     const delta = e.touches[0].clientY - startY.current;
     if (delta > 0) {
       setPullDistance(Math.min(delta * 0.5, threshold * 1.5));
+    } else {
+      // Scrolling up — cancel pull gesture
+      pulling.current = false;
+      setPullDistance(0);
     }
   }, [threshold]);
 

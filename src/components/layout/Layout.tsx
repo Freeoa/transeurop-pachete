@@ -49,7 +49,13 @@ function LayoutInner() {
       >
         <Topbar title={title} />
 
-        <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
+        <main
+          className="flex-1 overflow-y-auto overscroll-y-contain"
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            paddingBottom: isDesktop ? 0 : 'calc(4.5rem + env(safe-area-inset-bottom, 0px))',
+          }}
+        >
           {location.pathname === '/simulador' ? (
             <Outlet />
           ) : (

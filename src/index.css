@@ -67,7 +67,8 @@ body {
 }
 
 #root {
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
 }
 
 ::-webkit-scrollbar {
@@ -91,8 +92,18 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   background: #4c566a;
 }
 
-html {
-  scroll-behavior: smooth;
+/* Only smooth-scroll on desktop; on mobile it conflicts with overflow containers */
+@media (min-width: 768px) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Prevent body-level overscroll (iOS rubber-band) so inner containers scroll cleanly */
+html, body {
+  overscroll-behavior: none;
+  overflow: hidden;
+  height: 100%;
 }
 
 *:focus-visible {
@@ -253,8 +264,10 @@ table {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* ── Touch feedback ─────────────────────────────── */
-button:active:not(:disabled), [role="button"]:active:not([aria-disabled="true"]) {
-  transform: scale(0.97);
-  transition: transform 50ms ease-out;
+/* ── Touch feedback (desktop only — on touch devices this fights with scroll) ── */
+@media (hover: hover) and (pointer: fine) {
+  button:active:not(:disabled), [role="button"]:active:not([aria-disabled="true"]) {
+    transform: scale(0.97);
+    transition: transform 50ms ease-out;
+  }
 }
