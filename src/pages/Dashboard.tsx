@@ -418,7 +418,8 @@ export default function Dashboard() {
                 return (
                   <div
                     key={alert.id}
-                    className="flex items-start gap-3 px-3 py-2.5 rounded-[6px] bg-bg-secondary border border-border"
+                    onClick={() => navigate(`/comenzi/${alert.orderId}`)}
+                    className="flex items-start gap-3 px-3 py-2.5 rounded-[6px] bg-bg-secondary border border-border cursor-pointer hover:border-accent/40 transition-colors"
                   >
                     <div className={[
                       'flex items-center justify-center size-6 rounded-full shrink-0 mt-0.5',

@@ -43,7 +43,7 @@ export default function App() {
         <Route path="/comenzi" element={<Orders />} />
         <Route path="/comenzi/:id" element={<OrderDetail />} />
         <Route path="/comenzi/nou" element={<RoleGuard allowed={[...MANAGER]}><OrderCreate /></RoleGuard>} />
-        <Route path="/tracking" element={<Navigate to="/track" replace />} />
+        <Route path="/tracking" element={<PublicTracking embedded />} />
         <Route path="/programari" element={<RoleGuard allowed={[...MANAGER]}><RoutesPage /></RoleGuard>} />
         <Route path="/soferi" element={<RoleGuard allowed={[...MANAGER]}><Drivers /></RoleGuard>} />
         <Route path="/flota" element={<RoleGuard allowed={[...MANAGER]}><Fleet /></RoleGuard>} />

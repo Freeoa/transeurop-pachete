@@ -34,7 +34,7 @@ const statusIcon: Partial<Record<OrderStatus, typeof Package>> = {
   finalizat: CheckCircle2,
 };
 
-export default function PublicTracking() {
+export default function PublicTracking({ embedded }: { embedded?: boolean }) {
   const store = useDataStore();
   const { awb: urlAwb } = useParams<{ awb?: string }>();
   const [searchInput, setSearchInput] = useState(urlAwb ?? '');
@@ -85,23 +85,25 @@ export default function PublicTracking() {
   const CurrentStatusIcon = order ? (statusIcon[order.status] ?? Package) : Package;
 
   return (
-    <div className="min-h-screen bg-bg-primary">
-      {/* Header / Branding */}
-      <header className="bg-gradient-to-b from-bg-secondary to-bg-primary border-b border-border">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-center gap-3">
-          <Truck className="size-6 text-accent" />
-          <div className="text-center">
-            <h1 className="text-heading text-text-primary">
-              TransEurop
-            </h1>
-            <p className="text-[11px] text-text-tertiary uppercase tracking-widest">
-              Urmărire colet
-            </p>
+    <div className={embedded ? '' : 'h-screen overflow-y-auto bg-bg-primary'}>
+      {/* Header / Branding (public only) */}
+      {!embedded && (
+        <header className="bg-gradient-to-b from-bg-secondary to-bg-primary border-b border-border">
+          <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-center gap-3">
+            <Truck className="size-6 text-accent" />
+            <div className="text-center">
+              <h1 className="text-heading text-text-primary">
+                TransEurop
+              </h1>
+              <p className="text-[11px] text-text-tertiary uppercase tracking-widest">
+                Urmărire colet
+              </p>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
-      <main className="max-w-2xl mx-auto px-4 py-8">
+      <main className={embedded ? '' : 'max-w-2xl mx-auto px-4 py-8'}>
         {/* Search */}
         <form onSubmit={handleSearch} className="mb-8">
           <div className="relative">
@@ -320,14 +322,16 @@ export default function PublicTracking() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border mt-12">
-        <div className="max-w-2xl mx-auto px-4 py-4 text-center">
-          <p className="text-[11px] text-text-tertiary">
-            TransEurop &middot; Transport internațional România – Marea Britanie
-          </p>
-        </div>
-      </footer>
+      {/* Footer (public only) */}
+      {!embedded && (
+        <footer className="border-t border-border mt-12">
+          <div className="max-w-2xl mx-auto px-4 py-4 text-center">
+            <p className="text-[11px] text-text-tertiary">
+              TransEurop &middot; Transport internațional România – Marea Britanie
+            </p>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }
