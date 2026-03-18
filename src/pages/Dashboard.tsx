@@ -456,7 +456,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2">
             <MapPin className="size-4 text-accent" />
             <h2 className="text-[13px] font-semibold text-text-primary">Hartă rute active</h2>
-            <Badge variant="accent">{mapRoutes.length}</Badge>
+            <Badge variant="info">{mapRoutes.length}</Badge>
           </div>
           <button
             onClick={() => navigate('/harta')}
